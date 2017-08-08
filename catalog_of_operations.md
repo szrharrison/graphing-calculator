@@ -188,6 +188,7 @@
 |sum(|sum(list) returns the sum of every element in the list|
 |∑(|sum ∑(expr,var,low,high) repeated addition|
 |switch(||
+|<sup>T</sup>|matrix<sup>T</sup> returns the transposed matrix|
 |tan(|tan(value) returns the tangent of a value|
 |tan<sup>-1</sup>(|tan<sup>-1</sup>(value) returns the inverse tangent of a value|
 |tanh(|tanh(value) returns the hyperbolic tangent of a value|

@@ -28,6 +28,7 @@ Symbol|Operation
 <sup>r</sup>|_value_<sup>r</sup> changes _value_ to radians
 ˚|_value_˚ changes _value_ to degrees
 <sup>G</sup>|_value_<sup>G</sup> changes _value_ to gradians
+<sup>T</sup>|_matrix_<sup>T</sup> transpose the _matrix_
 ∠|
 '|_value_˚_value_' indicates minutes
 "|_value_˚_value_'_value_" indicates seconds
