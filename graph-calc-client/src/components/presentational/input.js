@@ -7,10 +7,10 @@ import { setExpression } from '../../actions/evaluate'
 class Input extends Component {
 
   handleKeyDown = event => {
-    const notCommandKey = event.key !== 'Control' && event.key !== 'Alt' && event.key !== 'Shift' && event.key !== 'Meta'
+    const notEnterKey = event.key !== 'Control' && event.key !== 'Alt' && event.key !== 'Shift' && event.key !== 'Meta'
     if(event.key === 'Enter') {
       this.props.setExpression(event.target.value)
-    } else if (notCommandKey) {
+    } else if (notEnterKey) {
       const keys = {
         Alt: event.altKey,
         Control: event.ctrlKey,
