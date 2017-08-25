@@ -90,6 +90,59 @@ export const symbols = {
   }
 }
 
+export const DELIMITERS = {
+    ',': true,
+    '(': true,
+    ')': true,
+    '[': true,
+    ']': true,
+    '{': true,
+    '}': true,
+    '\"': true,
+    ';': true,
+
+    '+': true,
+    '-': true,
+    '*': true,
+    '.*': true,
+    '/': true,
+    './': true,
+    '%': true,
+    '^': true,
+    '.^': true,
+    '~': true,
+    '!': true,
+    '&': true,
+    '|': true,
+    '^|': true,
+    '\'': true,
+    '=': true,
+    ':': true,
+    '?': true,
+
+    '==': true,
+    '!=': true,
+    '<': true,
+    '>': true,
+    '<=': true,
+    '>=': true,
+
+    '<<': true,
+    '>>': true,
+    '>>>': true
+  };
+
+  // map with all named delimiters
+  export const NAMED_DELIMITERS = {
+    'mod': true,
+    'to': true,
+    'in': true,
+    'and': true,
+    'xor': true,
+    'or': true,
+    'not': true
+  };
+
 // export const functions = {
 //   'abs': 'num => MathHandler.abs(num)',
 //   'angle': 'ang => MathHandler.angle(ang)',

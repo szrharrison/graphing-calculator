@@ -1,17 +1,6 @@
-/* Tokens: {
-  Literals,
-  Variables,
-  Operators,
-  Functions,
-  Function Argument Separators,
-  Open Parentheses,
-  Close Parentheses
-}
-*/
-
-function Token(type, value) {
-  this.type = type
-  this.value = value
+function Token(string) {
+  this.string = string.length ? string : ''  // current token string
+  this.type = 'NULL'                  // type of the token
 }
 
 export default Token
