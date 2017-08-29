@@ -1,6 +1,5 @@
 import _ from 'lodash'
-
-import matchNested from './matchNested'
+import Tokenizer from './mathParser/Tokenizer/tokenizer'
 
 class PrettyPrint {
 

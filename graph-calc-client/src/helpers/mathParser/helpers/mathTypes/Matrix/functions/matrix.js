@@ -2,6 +2,22 @@ import { typed } from '../../../types'
 import Matrix from '../Matrix'
 
 /**
+ * Create a new Matrix with given storage format
+ * @param {Array} data
+ * @param {string} [format]
+ * @param {string} [datatype]
+ * @returns {Matrix} Returns a new Matrix
+ * @private
+ */
+const _create = (data, format, datatype) => {
+  // get storage format constructor
+  const M = Matrix.storage(format || 'default')
+
+  // create instance
+  return new M(data, datatype)
+}
+
+/**
  * Create a Matrix. The function creates a new `math.type.Matrix` object from
  * an `Array`. A Matrix has utility functions to manipulate the data in the
  * matrix, like getting the size and getting or setting values in the matrix.
@@ -29,7 +45,7 @@ import Matrix from '../Matrix'
  *
  * @return {Matrix} The created matrix
  */
-export const matrix = typed('matrix', {
+const matrix = typed('matrix', {
   '': () => _create([]),
   'string': format => _create([], format),
   'string, string': (format, datatype) => _create([], format, datatype),
@@ -41,22 +57,8 @@ export const matrix = typed('matrix', {
 
 matrix.toTex = {
   0: '\\begin{bmatrix}\\end{bmatrix}',
-  1: '\\left(${args[0]}\\right)',
-  2: '\\left(${args[0]}\\right)'
+  1: '\\left(${args[0]}\\right)',       // eslint-disable-line
+  2: '\\left(${args[0]}\\right)'        // eslint-disable-line
 }
 
-/**
- * Create a new Matrix with given storage format
- * @param {Array} data
- * @param {string} [format]
- * @param {string} [datatype]
- * @returns {Matrix} Returns a new Matrix
- * @private
- */
-const _create = (data, format, datatype) => {
-  // get storage format constructor
-  const M = Matrix.storage(format || 'default')
-
-  // create instance
-  return new M(data, datatype)
-}
+export default matrix

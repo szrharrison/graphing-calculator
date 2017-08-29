@@ -82,7 +82,7 @@ class Validator {
   * @private
   */
   static isDecimalMark = (c, cNext) => {
-    return (c == '.' && cNext !== '/' && cNext !== '*' && cNext !== '^')
+    return (c === '.' && cNext !== '/' && cNext !== '*' && cNext !== '^')
   }
 
   /**

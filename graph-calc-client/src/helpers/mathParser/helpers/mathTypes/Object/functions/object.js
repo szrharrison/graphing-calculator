@@ -1,6 +1,7 @@
-import isBigNumber from './BigNumber'
+// Create a wrapper object for object functions
+const object = {}
 
-export const clone = x => {
+object.clone = x => {
   const type = typeof x
 
   if(type === 'number' || type === 'string' || type === 'boolean' || x === null || x === undefined) {
@@ -12,24 +13,29 @@ export const clone = x => {
   }
 
   if(Array.isArray(x)) {
-    return x.map( value => clone(value) )
+    return x.map( value => object.clone(value) )
   }
 
+  /* Note that using constructor methods for primitive types is discouraged as
+   * they return objects (instead of the primative type). E.g. new Boolean(false)
+   * returns a Boolean object with a value of false. Since all objects are truty,
+   * if(new Boolean(false)) {...} will always run.
+   */
   switch (true) {
     case x instanceof Number:
-      return new Number(x.valueOf())
+      return new Number(x.valueOf())    // eslint-disable-line
     case x instanceof String:
-      return new String(x.valueOf())
+      return new String(x.valueOf())    // eslint-disable-line
     case x instanceof Boolean:
-      return new Boolean(x.valueOf())
+      return new Boolean(x.valueOf())   // eslint-disable-line
     case x instanceof Date:
       return new Date(x.valueOf())
-    case isBigNumber(x):
+    case type.isBigNumber(x):
       return x
     case x instanceof RegExp:
       throw new TypeError(`Cannot clone ${x}`)
     default:
-      return map(x, clone)
+      return object.map(x, object.clone)
   }
 }
 
@@ -37,16 +43,16 @@ export const clone = x => {
  * Get a property of a plain object
  * Throws an error in case the object is not a plain object or the
  * property is not defined on the object itself
- * @param {Object} object
+ * @param {Object} obj
  * @param {string} prop
  * @return {*} Returns the property value when safe
  */
-export const getSafeProperty = (object, prop) => {
-  if(isPlainObject(object) && isSafeProperty(object, prop)) {
-    return object[prop]
+object.getSafeProperty = (obj, prop) => {
+  if(object.isPlainObject(obj) && object.isSafeProperty(obj, prop)) {
+    return obj[prop]
   }
 
-  if(typeof object[prop] === 'function' && isSafeMethod(object, prop)) {
+  if(typeof obj[prop] === 'function' && object.isSafeMethod(obj, prop)) {
     throw new Error(`Cannot access method ${prop} as a property`)
   }
 
@@ -57,15 +63,15 @@ export const getSafeProperty = (object, prop) => {
  * Set a property on a plain object.
  * Throws an error in case the object is not a plain object or the
  * property would override an inherited property like .constructor or .toString
- * @param {Object} object
+ * @param {Object} obj
  * @param {string} prop
  * @param {*} value
  * @return {*} Returns the value
  */
-export const setSafeProperty = (object, prop, value) => {
+object.setSafeProperty = (obj, prop, value) => {
   // only allow setting safe properties of a plain object
-  if(isPlainObject(object) && isSafeProperty(object, prop)) {
-    return object[prop] = value
+  if(object.isPlainObject(obj) && object.isSafeProperty(obj, prop)) {
+    return obj[prop] = value
   }
 
   throw new Error(`No access to property "${prop}"`)
@@ -77,13 +83,13 @@ export const setSafeProperty = (object, prop, value) => {
  * @param {string} prop
  * @return {boolean} Returns true when safe
  */
-export const isSafeProperty = (object, prop) => {
+object.isSafeProperty = (object, prop) => {
   if(!object || typeof object !== 'object') {
     return false
   }
   // SAFE: whitelisted
   // e.g length
-  if(hasOwnProperty(safeNativeProperties, prop)) {
+  if(prop.hasOwnProperty(safeNativeProperties)) {
     return true
   }
   // UNSAFE: inherited from Object prototype
@@ -102,11 +108,11 @@ export const isSafeProperty = (object, prop) => {
 /**
  * Validate whether a method is safe.
  * Throws an error when that's not the case.
- * @param {Object} object
+ * @param {Object} obj
  * @param {string} method
  */
-export const validateSafeMethod = (object, method) => {
-  if(!isSafeMethod(object, method)) {
+object.validateSafeMethod = (obj, method) => {
+  if(!object.isSafeMethod(obj, method)) {
     throw new Error(`No access to method "${method}"`)
   }
 }
@@ -114,18 +120,18 @@ export const validateSafeMethod = (object, method) => {
 /**
  * Check whether a method is safe.
  * Throws an error when that's not the case (for example for `constructor`).
- * @param {Object} object
+ * @param {Object} obj
  * @param {string} method
  * @return {boolean} Returns true when safe, false otherwise
  */
-export const isSafeMethod = (object, method) => {
-  if(!object || typeof object[method] !== 'function') {
+object.isSafeMethod = (obj, method) => {
+  if(!obj || typeof obj[method] !== 'function') {
     return false
   }
   // UNSAFE: ghosted
   // e.g overridden toString
-  if(object.hasOwnProperty(method) &&
-      (object.__proto__ && (method in object.__proto__))) {
+  if(obj.hasOwnProperty(method) &&
+      (obj.__proto__ && (method in obj.__proto__))) {
     return false
   }
   // SAFE: whitelisted
@@ -146,7 +152,7 @@ export const isSafeMethod = (object, method) => {
   return true
 }
 
-export const isPlainObject = object => typeof object === 'object' && object && object.constructor === Object
+object.isPlainObject = obj => (typeof obj === 'object' && obj && obj.constructor === Object)
 
 const safeNativeProperties = {
   length: true,
@@ -158,3 +164,5 @@ const safeNativeMethods = {
   valueOf: true,
   toLocaleString: true
 }
+
+export default object

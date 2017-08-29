@@ -1,16 +1,8 @@
 import Node from './Nodes/Node'
-import { DELIMETERS, NAMED_DELIMITERS } from '../../constants'
+import { NAMED_DELIMITERS, TOKENTYPE } from '../../constants'
 import { ParseError, TokenSyntaxError } from '../Errors'
-import Validator from './Validator'
 import Expression from './Expression'
-
-const TOKENTYPE = {
-  NULL: 'NULL',
-  DELIMETER: 'DELIMETER',
-  NUMBER: 'NUMBER',
-  SYMBOL: 'SYMBOL',
-  UNKNOWN: 'UNKNOWN'
-}
+import { type } from '../helpers/types'
 
 function Tokenizer() {
   let extra_nodes = {}              // current extra nodes
@@ -37,13 +29,13 @@ function Tokenizer() {
     } else if(Array.isArray(expr)) {
       expr.map( elem => {
         if(typeof elem !== 'string') {
-          error = new ParseError(`String expected. Instead, got ${elem}`)
+          errors.push(new ParseError(`String expected. Instead, got ${elem}`))
         }
         expression.set(elem)
         return parseStart()
       })
     } else {
-      error = new ParseError(`Array or string expected. Instead, got ${expr}`)
+      errors.push(new ParseError(`Array or string expected. Instead, got ${expr}`))
     }
   }
 
@@ -60,9 +52,9 @@ function Tokenizer() {
 
     if(expression.token.string !== '') {
       if(expression.token.type === TOKENTYPE.DELIMETER) {
-        error.push(new TokenSyntaxError(`Unexpected operator ${expression.token.string}`))
+        errors.push(new TokenSyntaxError(`Unexpected operator ${expression.token.string}`))
       } else {
-        error.push(new TokenSyntaxError(`Unexpected part ${expression.token.string}`))
+        errors.push(new TokenSyntaxError(`Unexpected part ${expression.token.string}`))
       }
     }
 
@@ -82,7 +74,7 @@ function Tokenizer() {
 
     if(expression.token.string !== '' && expression.token.string !== '\n' && expression.token.string !== ';') {
       node = parseAssignment()
-      node.comment = comment
+      node.comment = expression.comment
     }
 
     while(expression.token.string === '\n' || expression.token.string === ';') {
@@ -152,7 +144,7 @@ function Tokenizer() {
           value = parseAssignment()
           node = new Node('FUNCTION_ASSIGNMENT', name, args, value)
         } else {
-          error.push(new TokenSyntaxError('Invalid left hand side of assignment operator "="'))
+          errors.push(new TokenSyntaxError('Invalid left hand side of assignment operator "="'))
         }
       }
     }
@@ -182,7 +174,7 @@ function Tokenizer() {
       const trueExpr = parseAssignment()
 
       if(expression.token.string !== ':') {
-        error.push(new TokenSyntaxError('False part of conditional expression expected.'))
+        errors.push(new TokenSyntaxError('False part of conditional expression expected.'))
       }
       expression.conditional_level = null
       expression.nextTokenSkipNewline()
@@ -606,7 +598,7 @@ function Tokenizer() {
         }
 
         if(expression.token.string !== ')') {
-          error.push(new TokenSyntaxError('Parenthesis ) expected'))
+          errors.push(new TokenSyntaxError('Parenthesis ) expected'))
         }
         expression.paramsEnd()
         expression.nextToken()
@@ -827,7 +819,7 @@ function Tokenizer() {
             if(params[r].items.length !== cols) {
               errors.push(new TokenSyntaxError(
                 `Column dimensions mismatch (row ${r} doesn't have ${cols} columns)`
-              )
+              ))
             }
           }
 
@@ -986,14 +978,5 @@ function Tokenizer() {
     } else {
       errors.push(new TokenSyntaxError('Value expected'))
     }
-  }
-
-  /**
-   * Shortcut for getting the current col value (one based)
-   * @return {Integer} the column (position) where the last token starts
-   * @private
-   */
-  const col = () => {
-    return i - token.length + 1
   }
 }

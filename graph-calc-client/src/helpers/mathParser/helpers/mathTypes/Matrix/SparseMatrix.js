@@ -277,3 +277,5 @@ const _getsubset = (matrix, index) => {
     col.forEach()
   })
 }
+
+export default SparseMatrix

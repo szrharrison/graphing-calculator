@@ -1,71 +1,12 @@
-import typed from 'typed-function'
-import { clone, getSafeProperty, setSafeProperty } from './object'
-import { validateIndex } from './array'
-var matrix = require('../../type/matrix/function/matrix')
+import { type, typed } from './types'
+import objFunctions from './mathTypes/Object/functions/object'
+import arrFunctions from './mathTypes/Array/functions/array'
+import matrix from './mathTypes/Matrix/functions/matrix'
 
-/**
- * Get or set a subset of a matrix or string.
- *
- * Syntax:
- *     math.subset(value, index)                                // retrieve a subset
- *     math.subset(value, index, replacement [, defaultValue])  // replace a subset
- *
- * Examples:
- *
- *     // get a subset
- *     var d = [[1, 2], [3, 4]];
- *     math.subset(d, math.index(1, 0));        // returns 3
- *     math.subset(d, math.index([0, 2], 1));   // returns [[2], [4]]
- *
- *     // replace a subset
- *     var e = [];
- *     var f = math.subset(e, math.index(0, [0, 2]), [5, 6]);  // f = [[5, 6]]
- *     var g = math.subset(f, math.index(1, 1), 7, 0);         // g = [[5, 6], [0, 7]]
- *
- * See also:
- *
- *     size, resize, squeeze, index
- *
- * @param {Array | Matrix | string} matrix  An array, matrix, or string
- * @param {Index} index                     An index containing ranges for each
- *                                          dimension
- * @param {*} [replacement]                 An array, matrix, or scalar.
- *                                          If provided, the subset is replaced with replacement.
- *                                          If not provided, the subset is returned
- * @param {*} [defaultValue=undefined]      Default value, filled in on new entries when
- *                                          the matrix is resized. If not provided,
- *                                          math.matrix elements will be left undefined.
- * @return {Array | Matrix | string} Either the retrieved subset or the updated matrix.
- */
-export const subset = typed('subset', {
-  'Array, Index': (value, index) => {
-    const m = matrix(value)
-    const subset = m.subset(index)       // returns a Matrix
-    return index.isScalar()
-        ? subset
-        : subset.valueOf()  // return an Array (like the input)
-  },
-  'Matrix, Index': (value, index) => {
-    return value.subset(index)
-  },
-  'Object, Index': _getObjectProperty,
-  'string, Index': _getSubstring,
-  'Array, Index, any': (value, index, replacement) => {
-    return matrix(clone(value)).subset(index, replacement, undefined).valueOf()
-  },
-  'Array, Index, any, any': (value, index, replacement, defaultValue) => {
-    return matrix(clone(value)).subset(index, replacement, defaultValue).valueOf()
-  },
-  'Matrix, Index, any': (value, index, replacement) => {
-    return value.clone().subset(index, replacement)
-  },
-  'Matrix, Index, any, any': (value, index, replacement, defaultValue) => {
-    return value.clone().subset(index, replacement, defaultValue)
-  },
-  'string, Index, string': _setSubstring,
-  'string, Index, string, string': _setSubstring,
-  'Object, Index, any': _setObjectProperty
-})
+const { clone, getSafeProperty, setSafeProperty } = objFunctions
+const { validateIndex } = arrFunctions
+
+// PRIVATE METHODS
 
 /**
  * Retrieve a subset of a string
@@ -74,7 +15,7 @@ export const subset = typed('subset', {
  * @returns {string} substring
  * @private
  */
-export const _getSubstring (str, index) => {
+export const _getSubstring = (str, index) => {
   if(!type.isIndex(index)) {
     throw new TypeError('Index expected')
   }
@@ -125,7 +66,7 @@ export const _setSubstring = (str, index, replacement, defaultValue) => {
   }
 
   const range = index.dimension(0)
-  const len = range.size()[0]
+  let len = range.size()[0]
 
   if(len !== replacement.length) {
     throw new Error(range.size()[0], replacement.length)
@@ -145,7 +86,7 @@ export const _setSubstring = (str, index, replacement, defaultValue) => {
 
   // initialize undefined characters with a space
   if(chars.length > strLen) {
-    for(i = strLen - 1, len = chars.length; i < len; i++) {
+    for(let i = strLen - 1, len = chars.length; i < len; i++) {
       if(!chars[i]) {
         chars[i] = defaultValue
       }
@@ -199,3 +140,69 @@ export const _setObjectProperty = (object, index, replacement) => {
 
   return updated
 }
+
+/**
+ * Get or set a subset of a matrix or string.
+ *
+ * Syntax:
+ *     math.subset(value, index)                                // retrieve a subset
+ *     math.subset(value, index, replacement [, defaultValue])  // replace a subset
+ *
+ * Examples:
+ *
+ *     // get a subset
+ *     var d = [[1, 2], [3, 4]];
+ *     math.subset(d, math.index(1, 0));        // returns 3
+ *     math.subset(d, math.index([0, 2], 1));   // returns [[2], [4]]
+ *
+ *     // replace a subset
+ *     var e = [];
+ *     var f = math.subset(e, math.index(0, [0, 2]), [5, 6]);  // f = [[5, 6]]
+ *     var g = math.subset(f, math.index(1, 1), 7, 0);         // g = [[5, 6], [0, 7]]
+ *
+ * See also:
+ *
+ *     size, resize, squeeze, index
+ *
+ * @param {Array | Matrix | string} matrix  An array, matrix, or string
+ * @param {Index} index                     An index containing ranges for each
+ *                                          dimension
+ * @param {*} [replacement]                 An array, matrix, or scalar.
+ *                                          If provided, the subset is replaced with replacement.
+ *                                          If not provided, the subset is returned
+ * @param {*} [defaultValue=undefined]      Default value, filled in on new entries when
+ *                                          the matrix is resized. If not provided,
+ *                                          math.matrix elements will be left undefined.
+ * @return {Array | Matrix | string} Either the retrieved subset or the updated matrix.
+ */
+const subset = typed('subset', {
+  'Array, Index': (value, index) => {
+    const m = matrix(value)
+    const subset = m.subset(index)       // returns a Matrix
+    return index.isScalar()
+        ? subset
+        : subset.valueOf()  // return an Array (like the input)
+  },
+  'Matrix, Index': (value, index) => {
+    return value.subset(index)
+  },
+  'Object, Index': _getObjectProperty,
+  'string, Index': _getSubstring,
+  'Array, Index, any': (value, index, replacement) => {
+    return matrix(clone(value)).subset(index, replacement, undefined).valueOf()
+  },
+  'Array, Index, any, any': (value, index, replacement, defaultValue) => {
+    return matrix(clone(value)).subset(index, replacement, defaultValue).valueOf()
+  },
+  'Matrix, Index, any': (value, index, replacement) => {
+    return value.clone().subset(index, replacement)
+  },
+  'Matrix, Index, any, any': (value, index, replacement, defaultValue) => {
+    return value.clone().subset(index, replacement, defaultValue)
+  },
+  'string, Index, string': _setSubstring,
+  'string, Index, string, string': _setSubstring,
+  'Object, Index, any': _setObjectProperty
+})
+
+export default subset

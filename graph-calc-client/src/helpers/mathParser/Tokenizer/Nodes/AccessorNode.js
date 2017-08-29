@@ -1,9 +1,12 @@
 import Node from './Node'
-import IndexNode from './IndexNode'
-import compile, { register } from '../../compile'
-// var access = load(require('./utils/access'));
-// var stringify = require('../../utils/string').stringify;
-// var getSafeProperty = require('../../utils/customs').getSafeProperty;
+import compile, { register } from '../../helpers/compile'
+import { type } from '../../helpers/types'
+import access from '../../helpers/access'
+import strFunctions from '../../helpers/mathTypes/String/functions/string'
+import objFunctions from '../../helpers/mathTypes/Object/functions/object'
+
+const { getSafeProperty } = objFunctions
+const { stringify } = strFunctions
 
 /**
  * @constructor AccessorNode
@@ -14,38 +17,43 @@ import compile, { register } from '../../compile'
  *                                      a property or subset.
  * @param {IndexNode} index             IndexNode containing ranges
  */
-const AccessorNode = ([object, index]) => {
+function AccessorNode(object, index) {
   if(!(this instanceof AccessorNode)) {
-    throw new SyntaxError('Constructor must be called with the new operator');
+    throw new SyntaxError('Constructor must be called with the new operator')
   }
 
   if(!type.isNode(object)) {
-    throw new TypeError('Node expected for parameter "object"');
+    throw new TypeError('Node expected for parameter "object"')
   }
   if(!type.isIndexNode(index)) {
-    throw new TypeError('IndexNode expected for parameter "index"');
+    throw new TypeError('IndexNode expected for parameter "index"')
   }
 
   this.object = object || null
   this.index = index
 
   // readonly property name
-  let name
-
-  if(this.index) {
-    name = this.index.isObjectProperty()
-        ? this.index.getObjectProperty()
-        : ''
-  } else {
-    name = this.object.name || ''
-  }
-
-  this.name = () => name
+  Object.defineProperty(this, 'name', {
+    get: () => {
+      if(this.index) {
+        return (this.index.isObjectProperty()) ?
+            this.index.getObjectProperty()
+            : ''
+      } else {
+        return this.object.name || ''
+      }
+    },
+    set: () => {
+      throw new Error('Cannot assign a new name, name is read-only')
+    }
+  })
 }
+
+// Set type information
 
 AccessorNode.prototype = new Node()
 
-AccessorNode.prototype.type = 'ACCESSOR'
+AccessorNode.prototype.type = 'AccessorNode'
 
 AccessorNode.prototype.isAccessorNode = true
 
@@ -70,8 +78,8 @@ const compileAccessorNode = (node, defs, args) => {
   defs.access = access
   defs.getSafeProperty = getSafeProperty
 
-  const object = compile(node.object, defs, args);
-  const index = compile(node.index, defs, args);
+  const object = compile(node.object, defs, args)
+  const index = compile(node.index, defs, args)
 
   if(node.index.isObjectProperty()) {
     const jsProp = stringify(node.index.getObjectProperty())
@@ -79,7 +87,7 @@ const compileAccessorNode = (node, defs, args) => {
   } else if(node.index.needsSize()) {
     // if some parameters use the 'end' parameter, we need to calculate the size
     return `(function () {
-          var object = ${object}
+          const object = ${object}
           var size = math.size(object).valueOf()
           return access(object, ${index})
         })()`
@@ -90,4 +98,91 @@ const compileAccessorNode = (node, defs, args) => {
 }
 
 // register the compile function
-register(AccessorNode.prototype.type, compileAccessorNode)
+register(AccessorNode.prototype.type, compileAccessorNode);
+
+/**
+ * Execute a callback for each of the child nodes of this node
+ * @param {function(child: Node, path: string, parent: Node)} callback
+ */
+AccessorNode.prototype.forEach = function(callback) {
+  callback(this.object, 'object', this)
+  callback(this.index, 'index', this)
+}
+
+/**
+ * Create a new AccessorNode having it's childs be the results of calling
+ * the provided callback function for each of the childs of the original node.
+ * @param {function(child: Node, path: string, parent: Node): Node} callback
+ * @returns {AccessorNode} Returns a transformed copy of the node
+ */
+AccessorNode.prototype.map = function(callback) {
+  return new AccessorNode(
+      this._ifNode(callback(this.object, 'object', this)),
+      this._ifNode(callback(this.index, 'index', this))
+  );
+};
+
+/**
+ * Create a clone of this node, a shallow copy
+ * @return {AccessorNode}
+ */
+AccessorNode.prototype.clone = function() {
+  return new AccessorNode(this.object, this.index)
+}
+
+/**
+ * Get string representation
+ * @param {Object} options
+ * @return {string}
+ */
+AccessorNode.prototype._toString = function(options) {
+  var object = this.object.toString(options)
+  if (needParenthesis(this.object)) {
+    object = `(${object})`
+  }
+
+  return object + this.index.toString(options)
+};
+
+/**
+ * Get HTML representation
+ * @param {Object} options
+ * @return {string}
+ */
+AccessorNode.prototype.toHTML = function(options) {
+  let object = this.object.toHTML(options)
+  if(needParenthesis(this.object)) {
+    object = `<span class="math-parenthesis math-round-parenthesis">(</span>${object}<span class="math-parenthesis math-round-parenthesis">)</span>`
+  }
+
+  return object + this.index.toHTML(options)
+}
+
+/**
+ * Get LaTeX representation
+ * @param {Object} options
+ * @return {string}
+ */
+AccessorNode.prototype._toTex = function(options) {
+  let object = this.object.toTex(options)
+  if(needParenthesis(this.object)) {
+    object = `\\left(${object}\\right)`
+  }
+
+  return object + this.index.toTex(options)
+}
+
+/**
+ * Are parenthesis needed?
+ * @private
+ */
+const needParenthesis = node => !(
+      type.isAccessorNode(node) ||
+      type.isArrayNode(node) ||
+      type.isConstantNode(node) ||
+      type.isFunctionNode(node) ||
+      type.isObjectNode(node) ||
+      type.isParenthesisNode(node) ||
+      type.isSymbolNode(node))
+
+export default AccessorNode

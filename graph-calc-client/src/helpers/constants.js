@@ -1,4 +1,3 @@
-
 export const symbols = {
   greek: {
     uppercase: {
@@ -91,58 +90,68 @@ export const symbols = {
 }
 
 export const DELIMITERS = {
-    ',': true,
-    '(': true,
-    ')': true,
-    '[': true,
-    ']': true,
-    '{': true,
-    '}': true,
-    '\"': true,
-    ';': true,
+  ',': true,
+  '(': true,
+  ')': true,
+  '[': true,
+  ']': true,
+  '{': true,
+  '}': true,
+  '"': true,
+  ';': true,
+  '+': true,
+  '-': true,
+  '*': true,
+  '.*': true,
+  '/': true,
+  './': true,
+  '%': true,
+  '^': true,
+  '.^': true,
+  '~': true,
+  '!': true,
+  '&': true,
+  '|': true,
+  '^|': true,
+  '\'': true,
+  '=': true,
+  ':': true,
+  '?': true,
 
-    '+': true,
-    '-': true,
-    '*': true,
-    '.*': true,
-    '/': true,
-    './': true,
-    '%': true,
-    '^': true,
-    '.^': true,
-    '~': true,
-    '!': true,
-    '&': true,
-    '|': true,
-    '^|': true,
-    '\'': true,
-    '=': true,
-    ':': true,
-    '?': true,
+  '==': true,
+  '!=': true,
+  '<': true,
+  '>': true,
+  '<=': true,
+  '>=': true,
 
-    '==': true,
-    '!=': true,
-    '<': true,
-    '>': true,
-    '<=': true,
-    '>=': true,
+  '<<': true,
+  '>>': true,
+  '>>>': true
+}
 
-    '<<': true,
-    '>>': true,
-    '>>>': true
-  };
+// map with all named delimiters
+export const NAMED_DELIMITERS = {
+  'mod': true,
+  'to': true,
+  'in': true,
+  'and': true,
+  'xor': true,
+  'or': true,
+  'not': true
+}
 
-  // map with all named delimiters
-  export const NAMED_DELIMITERS = {
-    'mod': true,
-    'to': true,
-    'in': true,
-    'and': true,
-    'xor': true,
-    'or': true,
-    'not': true
-  };
+export const TOKENTYPE = {
+  NULL: 'NULL',
+  DELIMETER: 'DELIMETER',
+  NUMBER: 'NUMBER',
+  SYMBOL: 'SYMBOL',
+  UNKNOWN: 'UNKNOWN'
+}
 
+export const keywords = {
+  end: true
+}
 // export const functions = {
 //   'abs': 'num => MathHandler.abs(num)',
 //   'angle': 'ang => MathHandler.angle(ang)',

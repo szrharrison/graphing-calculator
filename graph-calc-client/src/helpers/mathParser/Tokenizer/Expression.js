@@ -1,6 +1,6 @@
 import Token from './Token'
 import Validator from './Validator'
-import { DELIMETERS, NAMED_DELIMITERS } from '../../constants'
+import { DELIMITERS, NAMED_DELIMITERS, TOKENTYPE } from '../../constants'
 import { ParseError, TokenSyntaxError } from '../Errors'
 
 function Expression() {
@@ -21,7 +21,7 @@ function Expression() {
    */
   this.next = () => {
     this.i ++
-    this.c = this.expression.charAt(i)
+    this.c = this.expression.charAt(this.i)
   }
 
   /**
@@ -78,7 +78,7 @@ function Expression() {
     if(c === '\n' && !this.nesting_level) {
       token.type = TOKENTYPE.DELIMETER
       token.string = c
-      next()
+      this.next()
       return
     }
 
@@ -109,7 +109,7 @@ function Expression() {
     token.type = TOKENTYPE.UNKNOWN
     while(c !== '') {
       token.string += c
-      next()
+      this.next()
     }
     this.errors.push( new ParseError(`Syntax error in part: "${token.string}"`))
   }
@@ -160,7 +160,7 @@ function Expression() {
       )
     ) {
       token.string += c
-      next()
+      this.next()
     }
 
     if(NAMED_DELIMITERS.hasOwnProperty(token.string)) {
@@ -183,18 +183,18 @@ function Expression() {
     switch (n) {
       case 3:
         token.string = c + previewMore()
-        next()
-        next()
-        next()
+        this.next()
+        this.next()
+        this.next()
         break
       case 2:
         token.string = c + previewNext()
-        next()
-        next()
+        this.next()
+        this.next()
         break
       default:
         token.string = c
-        next()
+        this.next()
     }
   }
 
@@ -209,7 +209,7 @@ function Expression() {
 
     if(c === '.') {
       token.string += c
-      next()
+      this.next()
 
       if(!Validator.isDigit(c)) {
         token.type = TOKENTYPE.DELIMETER
@@ -217,11 +217,11 @@ function Expression() {
     } else {
       while(Validator.isDigit(c)) {
         token.string += c
-        next()
+        this.next()
       }
       if(Validator.isDecimalMark(c, previewNext())) {
         token.string += c
-        next()
+        this.next()
       }
     }
 
@@ -230,11 +230,11 @@ function Expression() {
     if(c === 'E' || c === 'e') {
       if(Validator.isDigit(c2) || c2 === '-' || c2 === '+') {
         token.string += c
-        next()
+        this.next()
 
         if(c === '-' || c === '+') {
           token.string += c
-          next()
+          this.next()
         }
 
         if(!Validator.isDigit(c)) {
@@ -243,14 +243,14 @@ function Expression() {
 
         while(Validator.isDigit(c)) {
           token.string += c
-          next()
+          this.next()
         }
 
         if(Validator.isDecimalMark(c, previewNext())) {
           this.errors.push(new TokenSyntaxError(`Digit expected, got "${c}"`))
         }
       } else if(c2 === '.') {
-        next()
+        this.next()
         this.errors.push(new TokenSyntaxError(`Digit expected, got "${c}"`))
       }
     }
@@ -265,7 +265,7 @@ function Expression() {
     const c = this.c
     while(c !== '\n' && c !== '') {
       this.comment += c
-      next()
+      this.next()
     }
   }
 
@@ -276,8 +276,17 @@ function Expression() {
    */
   const nextWhitespace = () => {
     while(Validator.isWhitespace(this.c, this.nesting_level)) {
-      next()
+      this.next()
     }
+  }
+
+  /**
+   * Shortcut for getting the current col value (one based)
+   * @return {Integer} the column (position) where the last token starts
+   * @private
+   */
+  const col = () => {
+    return this.i - this.token.length + 1
   }
 }
 
@@ -291,3 +300,5 @@ Expression.prototype.first = function () {
   this.nesting_level = 0
   this.conditional_level = null
 }
+
+export default Expression

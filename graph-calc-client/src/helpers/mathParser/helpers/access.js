@@ -1,4 +1,6 @@
 import subset from './subset'
+import objFunctions from './mathTypes/Object/functions/object'
+const { getSafeProperty } = objFunctions
 /**
  * Retrieve part of an object:
  *
@@ -32,3 +34,5 @@ const access = (object, index) => {
     throw new TypeError('Cannot apply index: unsupported type of object')
   }
 }
+
+export default access

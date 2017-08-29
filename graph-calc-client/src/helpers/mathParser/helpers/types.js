@@ -1,10 +1,11 @@
 import typedFunction from 'typed-function'
+import numFunctions from './mathTypes/Number/functions/number'
+
+const { digits } = numFunctions
 
 const type = {}
-const typed = create(type)
-export {typed, type}
 
-let createTyped = () {
+let createTyped = () => {
   // initially, return the original instance of typed-function
   // consecutively, return a new instance from typed.create.
   createTyped = typedFunction.create
@@ -31,20 +32,20 @@ const create = (type) => {
   //   for security reasons, so these functions are not exposed in the expression
   //   parser.
   type.isNumber = x => (typeof x === 'number')
-  type.isComplex = x => (type.Complex && x instanceof type.Complex || false)
-  type.isBigNumber = isBigNumber
-  type.isFraction = x => (type.Fraction && x instanceof type.Fraction || false)
-  type.isUnit = x => (x && x.constructor.prototype.isUnit || false)
+  type.isComplex = x => ((type.Complex && x instanceof type.Complex) || false)
+  type.isBigNumber = x => ((x && x.constructor.prototype.isBigNumber) || false)
+  type.isFraction = x => ((type.Fraction && x instanceof type.Fraction) || false)
+  type.isUnit = x => ((x && x.constructor.prototype.isUnit) || false)
   type.isString = x => (typeof x === 'string')
   type.isArray = Array.isArray
-  type.isMatrix = isMatrix
-  type.isDenseMatrix = x => (x && x.isDenseMatrix && x.constructor.prototype.isMatrix || false)
-  type.isSparseMatrix = x => (x && x.isSparseMatrix && x.constructor.prototype.isMatrix || false)
-  type.isRange = x => (x && x.constructor.prototype.isRange || false)
-  type.isIndex = x => (x && x.constructor.prototype.isIndex || false)
+  type.isMatrix = x => ((x && x.constructor.prototype.isMatrix) || false)
+  type.isDenseMatrix = x => ((x && x.isDenseMatrix && x.constructor.prototype.isMatrix) || false)
+  type.isSparseMatrix = x => ((x && x.isSparseMatrix && x.constructor.prototype.isMatrix) || false)
+  type.isRange = x => ((x && x.constructor.prototype.isRange) || false)
+  type.isIndex = x => ((x && x.constructor.prototype.isIndex) || false)
   type.isBoolean = x => (typeof x === 'boolean')
-  type.isResultSet = x => (x && x.constructor.prototype.isResultSet || false)
-  type.isHelp = x => (x && x.constructor.prototype.isHelp || false)
+  type.isResultSet = x => ((x && x.constructor.prototype.isResultSet) || false)
+  type.isHelp = x => ((x && x.constructor.prototype.isHelp) || false)
   type.isFunction = x => (typeof x === 'function')
   type.isDate = x => (x instanceof Date)
   type.isRegExp = x => (x instanceof RegExp)
@@ -52,23 +53,23 @@ const create = (type) => {
   type.isNull = x => (x === null)
   type.isUndefined = x => (x === undefined)
 
-  type.isAccessorNode = x => (x && x.isAccessorNode && x.constructor.prototype.isNode || false)
-  type.isArrayNode = x => (x && x.isArrayNode && x.constructor.prototype.isNode || false)
-  type.isAssignmentNode = x => (x && x.isAssignmentNode && x.constructor.prototype.isNode || false)
-  type.isBlockNode = x => (x && x.isBlockNode && x.constructor.prototype.isNode || false)
-  type.isConditionalNode = x => (x && x.isConditionalNode && x.constructor.prototype.isNode || false)
-  type.isConstantNode = x => (x && x.isConstantNode && x.constructor.prototype.isNode || false)
-  type.isFunctionAssignmentNode = x => (x && x.isFunctionAssignmentNode && x.constructor.prototype.isNode || false)
-  type.isFunctionNode = x => (x && x.isFunctionNode && x.constructor.prototype.isNode || false)
-  type.isIndexNode = x => (x && x.isIndexNode && x.constructor.prototype.isNode || false)
-  type.isNode = x => (x && x.isNode && x.constructor.prototype.isNode || false)
-  type.isObjectNode = x => (x && x.isObjectNode && x.constructor.prototype.isNode || false)
-  type.isOperatorNode = x => (x && x.isOperatorNode && x.constructor.prototype.isNode || false)
-  type.isParenthesisNode = x => (x && x.isParenthesisNode && x.constructor.prototype.isNode || false)
-  type.isRangeNode = x => (x && x.isRangeNode && x.constructor.prototype.isNode || false)
-  type.isSymbolNode = x => (x && x.isSymbolNode && x.constructor.prototype.isNode || false)
+  type.isAccessorNode = x => ((x && x.isAccessorNode && x.constructor.prototype.isNode) || false)
+  type.isArrayNode = x => ((x && x.isArrayNode && x.constructor.prototype.isNode) || false)
+  type.isAssignmentNode = x => ((x && x.isAssignmentNode && x.constructor.prototype.isNode) || false)
+  type.isBlockNode = x => ((x && x.isBlockNode && x.constructor.prototype.isNode) || false)
+  type.isConditionalNode = x => ((x && x.isConditionalNode && x.constructor.prototype.isNode) || false)
+  type.isConstantNode = x => ((x && x.isConstantNode && x.constructor.prototype.isNode) || false)
+  type.isFunctionAssignmentNode = x => ((x && x.isFunctionAssignmentNode && x.constructor.prototype.isNode) || false)
+  type.isFunctionNode = x => ((x && x.isFunctionNode && x.constructor.prototype.isNode) || false)
+  type.isIndexNode = x => ((x && x.isIndexNode && x.constructor.prototype.isNode) || false)
+  type.isNode = x => ((x && x.isNode && x.constructor.prototype.isNode) || false)
+  type.isObjectNode = x => ((x && x.isObjectNode && x.constructor.prototype.isNode) || false)
+  type.isOperatorNode = x => ((x && x.isOperatorNode && x.constructor.prototype.isNode) || false)
+  type.isParenthesisNode = x => ((x && x.isParenthesisNode && x.constructor.prototype.isNode) || false)
+  type.isRangeNode = x => ((x && x.isRangeNode && x.constructor.prototype.isNode) || false)
+  type.isSymbolNode = x => ((x && x.isSymbolNode && x.constructor.prototype.isNode) || false)
 
-  type.isChain = x => (x && x.constructor.prototype.isChain || false)
+  type.isChain = x => ((x && x.constructor.prototype.isChain) || false)
 
   // get a new instance of typed-function
   const typed = createTyped()
@@ -121,8 +122,7 @@ const create = (type) => {
       convert: x => {
         // note: conversion from number to BigNumber can fail if x has >15 digits
         if (digits(x) > 15) {
-          throw new TypeError(`Cannot implicitly convert a number with >15 significant digits to BigNumber
-          (value: ${x}). Use function bignumber(x) to convert to BigNumber.`)
+          throw new TypeError(`Cannot implicitly convert a number with >15 significant digits to BigNumber (value: ${x}). Use function bignumber(x) to convert to BigNumber.`)
         }
         return new type.BigNumber(x);
       }
@@ -142,8 +142,7 @@ const create = (type) => {
       from: 'Fraction',
       to: 'BigNumber',
       convert: x => {
-        throw new TypeError('Cannot implicitly convert a Fraction to BigNumber or vice versa.
-            Use function bignumber(x) to convert to BigNumber or fraction(x) to convert to Fraction.')
+        throw new TypeError('Cannot implicitly convert a Fraction to BigNumber or vice versa. Use function bignumber(x) to convert to BigNumber or fraction(x) to convert to Fraction.')
       }
     }, {
       from: 'Fraction',
@@ -155,8 +154,7 @@ const create = (type) => {
       convert: x => {
         const f = new type.Fraction(x)
         if(f.valueOf() !== x) {
-          throw new TypeError(`Cannot implicitly convert a number to a Fraction when there will be a loss of precision
-              (value: ${x}). Use function fraction(x) to convert to Fraction.`)
+          throw new TypeError(`Cannot implicitly convert a number to a Fraction when there will be a loss of precision (value: ${x}). Use function fraction(x) to convert to Fraction.`)
         }
         return new type.Fraction(x)
       }
@@ -178,7 +176,7 @@ const create = (type) => {
           return new type.BigNumber(x)
         }
         catch (err) {
-          throw new Error('Cannot convert "' + x + '" to BigNumber')
+          throw new Error(`Cannot convert "${x}" to BigNumber`)
         }
       }
     }, {
@@ -189,7 +187,7 @@ const create = (type) => {
           return new type.Fraction(x)
         }
         catch (err) {
-          throw new Error('Cannot convert "' + x + '" to Fraction')
+          throw new Error(`Cannot convert "${x}" to Fraction`)
         }
       }
     }, {
@@ -200,7 +198,7 @@ const create = (type) => {
           return new type.Complex(x)
         }
         catch(err) {
-          throw new Error('Cannot convert "' + x + '" to Complex')
+          throw new Error(`Cannot convert "${x}" to Complex`)
         }
       }
     }, {
@@ -246,54 +244,50 @@ const create = (type) => {
     }
   ]
 
-  return typed
-}
-
-function Type() {
   /**
-   * Determine the type of a variable
-   *
-   *     Type.find(x)
-   *
-   * The following types are recognized:
-   *
-   *     'undefined'
-   *     'null'
-   *     'boolean'
-   *     'number'
-   *     'string'
-   *     'Array'
-   *     'Function'
-   *     'Date'
-   *     'RegExp'
-   *     'Object'
-   *
-   * @param {*} x
-   * @return {string} Returns the name of the type. Primitive types are lower case,
-   *                  non-primitive types are upper-camel-case.
-   *                  For example 'number', 'string', 'Array', 'Date'.
-   */
-  this.find = x => {
+  * Determine the type of a variable
+  *
+  *     typed.find(x)
+  *
+  * The following types are recognized:
+  *
+  *     'undefined'
+  *     'null'
+  *     'boolean'
+  *     'number'
+  *     'string'
+  *     'Array'
+  *     'Function'
+  *     'Date'
+  *     'RegExp'
+  *     'Object'
+  *
+  * @param {*} x
+  * @return {string} Returns the name of the type. Primitive types are lower case,
+  *                  non-primitive types are upper-camel-case.
+  *                  For example 'number', 'string', 'Array', 'Date'.
+  */
+  typed.find = x => {
     let type = typeof x
 
     if(type === 'object') {
       switch (true) {
         case x === null:
-          return 'null'
+        return 'null'
         case Array.isArray(x):
-          return 'Array'
+        return 'Array'
         case x instanceof Date:
-          return 'Date'
+        return 'Date'
         case x instanceof RegExp:
-          return 'RegExp'
+        return 'RegExp'
         case x instanceof Boolean:
-          return 'boolean'
+        return 'boolean'
         case x instanceof Number:
-          return 'number'
+        return 'number'
         case x instanceof String:
-          return 'string'
+        return 'string'
         default:
-          return 'Object'
+        return 'Object'
       }
     } else if(type === 'function') {
       type = 'Function'
@@ -301,4 +295,9 @@ function Type() {
 
     return type
   }
+
+  return typed
 }
+
+const typed = create(type)
+export { typed, type }
