@@ -180,3 +180,5 @@ SymbolNode.prototype.toHTML = function(options) {
 //   //the space prevents symbols from breaking stuff like '\cdot' if it's written right before the symbol
 //   return ` ${symbol}`
 // }
+
+export default SymbolNode

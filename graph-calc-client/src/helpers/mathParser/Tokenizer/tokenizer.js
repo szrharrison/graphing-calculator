@@ -1,8 +1,25 @@
-import Node from './Nodes/Node'
+import * as Nodes from './Nodes'
 import { NAMED_DELIMITERS, TOKENTYPE } from '../../constants'
 import { ParseError, TokenSyntaxError } from '../Errors'
 import Expression from './Expression'
 import { type } from '../helpers/types'
+
+const {
+  AccessorNode,
+  ArrayNode,
+  AssignmentNode,
+  BlockNode,
+  ConditionalNode,
+  ConstantNode,
+  FunctionAssignmentNode,
+  FunctionNode,
+  IndexNode,
+  ObjectNode,
+  OperatorNode,
+  ParenthesisNode,
+  RangeNode,
+  SymbolNode
+} = Nodes
 
 function Tokenizer() {
   let extra_nodes = {}              // current extra nodes
@@ -84,10 +101,10 @@ function Tokenizer() {
     }
 
     if(blocks.length > 0) {
-      node = new Node('BLOCK', blocks)
+      node = new BlockNode(blocks)
     } else {
       if(!node) {
-        node = new Node('CONSTANT', 'undefined', 'undefined')
+        node = new ConstantNode('undefined', 'undefined')
         node.comment = expression.comment
       }
     }
@@ -122,11 +139,11 @@ function Tokenizer() {
         name = node.name
         expression.nextTokenSkipNewline()
         value = parseAssignment()
-        node = new Node('ASSIGNMENT', new Node('SYMBOL', value))
+        node = new AssignmentNode(new SymbolNode(value))
       } else if(type.isAccessor(node)) {
         expression.nextTokenSkipNewline()
         value = parseAssignment()
-        node = new Node('ASSIGNMENT', node.object, node.i, value)
+        node = AssignmentNode(node.object, node.i, value)
       } else if(type.isFunction(node)) {
         valid = true
         args = []
@@ -142,7 +159,7 @@ function Tokenizer() {
         if(valid) {
           expression.nextTokenSkipNewline()
           value = parseAssignment()
-          node = new Node('FUNCTION_ASSIGNMENT', name, args, value)
+          node = new FunctionAssignmentNode(name, args, value)
         } else {
           errors.push(new TokenSyntaxError('Invalid left hand side of assignment operator "="'))
         }
@@ -181,7 +198,7 @@ function Tokenizer() {
 
       const falseExpr = parseAssignment()
 
-      node = new Node('CONDITIONAL', condition, trueExpr, falseExpr)
+      node = new ConditionalNode(condition, trueExpr, falseExpr)
 
       expression.conditional_level = prev
     }
@@ -199,7 +216,7 @@ function Tokenizer() {
 
     while(expression.token.string === 'or') {
       expression.nextTokenSkipNewline()
-      node = new Node('OPERATOR', 'or', 'or', [node, parseLogicalXor()])
+      node = new OperatorNode('or', 'or', [node, parseLogicalXor()])
     }
 
     return node
@@ -215,7 +232,7 @@ function Tokenizer() {
 
     while(expression.token.string === 'xor') {
       expression.nextTokenSkipNewline()
-      node = new Node('OPERATOR', 'xor', 'xor', [node, parseLogicalAnd()])
+      node = new OperatorNode('xor', 'xor', [node, parseLogicalAnd()])
     }
 
     return node
@@ -231,7 +248,7 @@ function Tokenizer() {
 
     while(expression.token.string === 'and') {
       expression.nextTokenSkipNewline()
-      node = new Node('OPERATOR', 'and', 'and', [node, parseBitwiseOr()])
+      node = new OperatorNode('and', 'and', [node, parseBitwiseOr()])
     }
 
     return node
@@ -247,7 +264,7 @@ function Tokenizer() {
 
     while(expression.token.string === '|') {
       expression.nextTokenSkipNewline()
-      node = new Node('OPERATOR', '|', 'bitOr', [node, parseBitwiseXor()])
+      node = new OperatorNode('|', 'bitOr', [node, parseBitwiseXor()])
     }
 
     return node
@@ -263,7 +280,7 @@ function Tokenizer() {
 
     while(expression.token.string === '^|') {
       expression.nextTokenSkipNewline()
-      node = new Node('OPERATOR', '^|', 'bitXor', [node, parseBitwiseAnd()])
+      node = new OperatorNode('^|', 'bitXor', [node, parseBitwiseAnd()])
     }
 
     return node
@@ -279,7 +296,7 @@ function Tokenizer() {
 
     while(expression.token.string === '&') {
       expression.nextTokenSkipNewline()
-      node = new Node('OPERATOR', '&', 'bitAnd', [node, parseRelational()])
+      node = new OperatorNode('&', 'bitAnd', [node, parseRelational()])
     }
 
     return node
@@ -310,7 +327,7 @@ function Tokenizer() {
 
       expression.nextTokenSkipNewline()
       params = [node, parseConversion()]
-      node = new Node('OPERATOR', name, fn, params)
+      node = new OperatorNode(name, fn, params)
     }
 
     return node
@@ -327,7 +344,7 @@ function Tokenizer() {
     while(expression.token.string === 'to') {
       expression.nextTokenSkipNewline()
 
-      node = new Node('OPERATOR', 'to', 'to', [node, parseRange()])
+      node = new OperatorNode('to', 'to', [node, parseRange()])
     }
 
     return node
@@ -343,7 +360,7 @@ function Tokenizer() {
 
     if(expression.token.string === ':') {
       // implicit start=1 (one-based)
-      node = new Node('LITERAL', 1, 'number')
+      node = new ConstantNode(1, 'number')
     } else {
       node = parseAddSubtract()
     }
@@ -362,7 +379,7 @@ function Tokenizer() {
           expression.token.string === ',' ||
           expression.token.string === '') {
           // implicit end
-          params.push(new Node('SYMBOL', 'end'))
+          params.push(new SymbolNode('end'))
         } else {
           params.push(parseAddSubtract())
         }
@@ -370,10 +387,10 @@ function Tokenizer() {
 
       if(params.length === 3) {
         // params = [start, step, end]
-        node = new Node('RANGE', params[0], params[2], params[1]) // start, end, step
+        node = new RangeNode(params[0], params[2], params[1]) // start, end, step
       } else { // length === 2
         // params = [start, end]
-        node = new Node('RANGE', params[0], params[1]) // start, end
+        node = new RangeNode(params[0], params[1]) // start, end
       }
     }
 
@@ -401,7 +418,7 @@ function Tokenizer() {
 
       expression.nextTokenSkipNewline()
       params = [node, parseMultiplyDivide()]
-      node = new Node('OPERATOR', name, fn, params)
+      node = new OperatorNode(name, fn, params)
     }
 
     return node
@@ -436,7 +453,7 @@ function Tokenizer() {
         expression.nextTokenSkipNewline()
 
         last = parseUnary()
-        node = new Node('OPERATOR', name, fn, [node, last]);
+        node = new OperatorNode(name, fn, [node, last]);
       } else if(
             (expression.token.type === TOKENTYPE.SYMBOL) ||              // :Symbol
             (expression.token.string === 'in' && type.isConstantNode(node)) ||  // :Symbol
@@ -453,7 +470,7 @@ function Tokenizer() {
         // number:      implicit multiplication like '(2+3)2'
         // parenthesis: implicit multiplication like '2(3+4)', '(3+4)(1+2)'
         last = parseUnary()
-        node = new Node('OPERATOR', '*', 'multiply', [node, last], true /*implicit*/)
+        node = new OperatorNode('*', 'multiply', [node, last], true /*implicit*/)
       } else {
         break
       }
@@ -486,7 +503,7 @@ function Tokenizer() {
       expression.nextTokenSkipNewline()
 
       params = [parseUnary()]
-      node = new Node('OPERATOR', name, fn, params)
+      node = new OperatorNode(name, fn, params)
     }
 
     return node
@@ -510,7 +527,7 @@ function Tokenizer() {
       expression.nextTokenSkipNewline()
       params = [node, parseUnary()]
 
-      node = new Node('OPERATOR', name, fn, params)
+      node = new OperatorNode(name, fn, params)
     }
 
     return node
@@ -538,7 +555,7 @@ function Tokenizer() {
       expression.nextTokenSkipNewline()
       params = [node]
 
-      node = new Node('OPERATOR', name, fn, params)
+      node = new OperatorNode(name, fn, params)
       node = parseAccessors(node)
     }
 
@@ -629,7 +646,7 @@ function Tokenizer() {
       expression.nextToken()
 
       // parse function parameters and matrix index
-      node = new Node('SYMBOL', name)
+      node = new SymbolNode(name)
       node = parseAccessors(node)
     }
 
@@ -680,7 +697,7 @@ function Tokenizer() {
           expression.paramsEnd()
           expression.nextToken()
 
-          node = new Node('FUNCTION', node, params)
+          node = new FunctionNode(node, params)
         } else {
           // implicit multiplication like (2+3)(4+5)
           // don't parse it here but let it be handled by parseMultiplyDivide
@@ -708,7 +725,7 @@ function Tokenizer() {
         expression.paramsEnd()
         expression.nextToken()
 
-        node = new Node('ACCESSOR', node, new Node('INDEX', params))
+        node = new AccessorNode(node, new IndexNode(params))
       } else {
         // dot notation like variable.prop
         expression.nextToken()
@@ -716,11 +733,11 @@ function Tokenizer() {
         if(expression.token.type !== TOKENTYPE.SYMBOL) {
           errors.push(new TokenSyntaxError('Property name expected after dot'))
         }
-        params.push(new Node('CONSTANT', expression.token.string))
+        params.push(new ConstantNode(expression.token.string))
         expression.nextToken()
 
         const dotNotation = true
-        node = new Node('ACCESSOR', node, new Node('INDEX', params, dotNotation))
+        node = new AccessorNode(node, new IndexNode(params, dotNotation))
       }
     }
 
@@ -740,7 +757,7 @@ function Tokenizer() {
     if(expression.token.string === '"') {
       str = parseStringToken()
 
-      node = new Node('CONSTANT', str, 'string')
+      node = new ConstantNode(str, 'string')
 
       node = parseAccessors(node)
     }
@@ -823,7 +840,7 @@ function Tokenizer() {
             }
           }
 
-          node = new Node('ARRAY', params)
+          node = new ArrayNode(params)
         } else {
           // 1 dimensional vector
           if(expression.token.string !== ']') {
@@ -838,7 +855,7 @@ function Tokenizer() {
         // this is an empty matrix "[ ]"
         expression.paramsEnd()
         expression.nextToken()
-        node = new Node('ARRAY', [])
+        node = new ArrayNode([])
       }
       node = parseAccessors(node)
     }
@@ -862,7 +879,7 @@ function Tokenizer() {
       len++
     }
 
-    return new Node('ARRAY', params)
+    return new ArrayNode(params)
   }
 
   /**
@@ -907,7 +924,7 @@ function Tokenizer() {
       }
       expression.nextToken()
 
-      node = new Node('OBJECT', properties)
+      node = new ObjectNode(properties)
 
       // parse index parameters
       node = parseAccessors(node)
@@ -929,7 +946,7 @@ function Tokenizer() {
       const number = expression.token.string
       expression.nextToken()
 
-      node = new Node('CONSTANT', number, 'number')
+      node = new ConstantNode(number, 'number')
     }
 
     return node
@@ -957,7 +974,7 @@ function Tokenizer() {
       expression.paramsEnd()
       expression.nextToken()
 
-      node = new Node('PARENTHESES', node)
+      node = new ParenthesisNode(node)
       node = parseAccessors(node)
     }
 
@@ -980,3 +997,5 @@ function Tokenizer() {
     }
   }
 }
+
+export default Tokenizer

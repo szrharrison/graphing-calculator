@@ -2,15 +2,11 @@ import { type } from '../../helpers/types'
 import strFunctions from '../../helpers/mathTypes/String/functions/string'
 import compile, { register } from '../../helpers/compile'
 import Node from './Node'
-import RangeNode from './RangeNode'
-import SymbolNode from './SymbolNode'
 import Range from '../../helpers/mathTypes/Matrix/Range'
 import arrFunctions from '../../helpers/mathTypes/Array/functions/array'
 
 const { join } = arrFunctions
 const { escape } = strFunctions
-
-
 
 /**
  * @constructor IndexNode

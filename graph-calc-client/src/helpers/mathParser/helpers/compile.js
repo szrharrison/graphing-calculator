@@ -10,8 +10,7 @@ const compileFunctions = {}
 export const register = (type, compileFunction) => {
   if (compileFunctions[type] === undefined) {
     compileFunctions[type] = compileFunction
-  }
-  else {
+  } else {
     throw new Error(`Cannot register type "${type}": already exists`)
   }
 }
@@ -30,10 +29,10 @@ export const register = (type, compileFunction) => {
  */
 const compile = (node, defs, args) => {
   if (compileFunctions.hasOwnProperty(node.type)) {
-    var compileFunction = compileFunctions[node.type]
+    const compileFunction = compileFunctions[node.type]
     return compileFunction(node, defs, args)
   } else if(typeof node._compile === 'function' &&
-      !node.hasOwnProperty('_compile')) {
+            !node.hasOwnProperty('_compile')) {
     // Compatibility for CustomNodes
     return node._compile(defs, args)
   } else {

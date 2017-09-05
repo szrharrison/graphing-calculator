@@ -16,7 +16,7 @@ function ArrayNode(items) {
     throw new SyntaxError('Constructor must be called with the new operator')
   }
 
-  this.items = items || []
+  this.items = items ? items : []
 
   // validate input
   if(!Array.isArray(this.items) || !this.items.every(type.isNode)) {
@@ -56,18 +56,17 @@ const compileArrayNode = (node, defs, args) => {
 }
 
 // register the compile function
-register(ArrayNode.prototype.type, compileArrayNode);
+register(ArrayNode.prototype.type, compileArrayNode)
 
-    /**
+/**
  * Execute a callback for each of the child nodes of this node
  * @param {function(child: Node, path: string, parent: Node)} callback
  */
-ArrayNode.prototype.forEach = function (callback) {
-  for (var i = 0; i < this.items.length; i++) {
-    var node = this.items[i];
-    callback(node, 'items[' + i + ']', this);
+ArrayNode.prototype.forEach = function(callback) {
+  for(let i = 0; i < this.items.length; i++) {
+    callback(this.items[i], `items[${i}]`, this)
   }
-};
+}
 
 /**
  * Create a new ArrayNode having it's childs be the results of calling
@@ -75,21 +74,23 @@ ArrayNode.prototype.forEach = function (callback) {
  * @param {function(child: Node, path: string, parent: Node): Node} callback
  * @returns {ArrayNode} Returns a transformed copy of the node
  */
-ArrayNode.prototype.map = function (callback) {
-  var items = [];
-  for (var i = 0; i < this.items.length; i++) {
-    items[i] = this._ifNode(callback(this.items[i], 'items[' + i + ']', this));
+ArrayNode.prototype.map = function(callback) {
+  const items = []
+
+  for(let i = 0; i < this.items.length; i++) {
+    items[i] = this._ifNode(callback(this.items[i], `items[${i}]`, this))
   }
-  return new ArrayNode(items);
-};
+
+  return new ArrayNode(items)
+}
 
 /**
  * Create a clone of this node, a shallow copy
  * @return {ArrayNode}
  */
 ArrayNode.prototype.clone = function() {
-  return new ArrayNode(this.items.slice(0));
-};
+  return new ArrayNode(this.items.slice(0))
+}
 
 /**
  * Get string representation
@@ -98,11 +99,10 @@ ArrayNode.prototype.clone = function() {
  * @override
  */
 ArrayNode.prototype._toString = function(options) {
-  var items = this.items.map(function (node) {
-    return node.toString(options);
-  });
-  return '[' + items.join(', ') + ']';
-};
+  const items = this.items.map( node => node.toString(options) )
+
+  return `[${items.join(', ')}]`
+}
 
 /**
  * Get HTML representation
@@ -111,11 +111,10 @@ ArrayNode.prototype._toString = function(options) {
  * @override
  */
 ArrayNode.prototype.toHTML = function(options) {
-  var items = this.items.map(function (node) {
-    return node.toHTML(options);
-  });
-  return '<span class="math-parenthesis math-square-parenthesis">[</span>' + items.join('<span class="math-separator">,</span>') + '<span class="math-parenthesis math-square-parenthesis">]</span>';
-};
+  const items = this.items.map( node => node.toHTML(options) )
+
+  return `<span class="math-parenthesis math-square-parenthesis">[</span>${items.join('<span class="math-separator">,</span>')}<span class="math-parenthesis math-square-parenthesis">]</span>`
+}
 
 /**
  * Get LaTeX representation
@@ -123,23 +122,21 @@ ArrayNode.prototype.toHTML = function(options) {
  * @return {string} str
  */
 ArrayNode.prototype._toTex = function(options) {
-  var s = '\\begin{bmatrix}';
+  let s = '\\begin{bmatrix}'
 
-  this.items.forEach(function(node) {
-    if (node.items) {
-      s += node.items.map(function(childNode) {
-        return childNode.toTex(options);
-      }).join('&');
-    }
-    else {
-      s += node.toTex(options);
+  this.items.forEach( node => {
+    if(node.items) {
+      s += node.items.map( childNode => childNode.toTex(options) ).join('&')
+    } else {
+      s += node.toTex(options)
     }
 
     // new line
     s += '\\\\';
-  });
-  s += '\\end{bmatrix}';
-  return s;
+  })
+
+  s += '\\end{bmatrix}'
+  return s
 }
 
 export default ArrayNode
