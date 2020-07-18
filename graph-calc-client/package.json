@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "lodash": "^4.17.4",
+    "lodash": "^4.17.19",
     "mathjs": "^3.16.1",
     "react": "^15.6.1",
     "react-dom": "^15.6.1",
